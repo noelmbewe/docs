@@ -1,28 +1,38 @@
+
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+One-Khusa Payment Gateway API Documentation
 ---
 
 <Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
+  This documentation provides a complete reference for integrating with the
+  One-Khusa Payment Gateway. You’ll find details about authentication,
+  batch transactions, single transactions, and supported schemas.
 </Note>
 
 ## Welcome
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+The One-Khusa API enables developers to build secure payment solutions,
+manage batch payouts, and track single transactions in real time.  
+
+We provide two main ways to explore the API:  
+
+- **OpenAPI specification** (auto-generated docs with full request/response details)  
+- **MDX components** (customizable explanations and use cases)  
 
 <Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
+  title="One-Khusa API Specification"
+  icon="credit-card"
+  href="https://github.com/one-khusa/api/blob/main/openapi.json"
 >
   View the OpenAPI specification file
 </Card>
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+All API endpoints are authenticated using **Bearer tokens**.  
+When making requests, include your token in the `Authorization` header:  
+
+
 
 ```json
 "security": [

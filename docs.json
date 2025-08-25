@@ -1,13 +1,13 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "Khusa Payment Gateway",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#0096FF",
+    "light": "#0096FF",
+    "dark": "#0096FF"
   },
-  "favicon": "/favicon.svg",
+  "favicon": "/logo/one-khusa.svg",
   "navigation": {
     "tabs": [
       {
@@ -57,7 +57,70 @@
             ]
           },
           {
-            "group": "Endpoint examples",
+
+            "group": "Disbursements (Payouts)",
+            "pages": [
+              "api-reference/disbursements/batch-addFile",
+              "api-reference/disbursements/batch-addJson",
+              "api-reference/disbursements/batch-cancel",
+              "api-reference/disbursements/batch-changeStatus",
+              "api-reference/disbursements/batch-download",
+              "api-reference/disbursements/batch-generateFakeTransactions",
+              "api-reference/disbursements/batch-getBatch",
+              "api-reference/disbursements/batch-getBatches",
+              "api-reference/disbursements/batch-getTransaction",
+              "api-reference/disbursements/batch-getTransactions",
+              "api-reference/disbursements/batch-reject",
+              "api-reference/disbursements/batch-transferFunds",
+              "api-reference/disbursements/single-add",
+              "api-reference/disbursements/single-getTransaction",
+              "api-reference/disbursements/single-getTransactions"
+            
+            ]
+          },
+          {
+
+            "group": "Collections (Accept Payments)",
+            "pages": [
+              "api-reference/endpoint/get",
+              "api-reference/endpoint/create",
+              "api-reference/endpoint/delete",
+              "api-reference/endpoint/webhook"
+            ]
+          },
+          {
+
+            "group": "Merchants",
+            "pages": [
+              "api-reference/endpoint/get",
+              "api-reference/endpoint/create",
+              "api-reference/endpoint/delete",
+              "api-reference/endpoint/webhook"
+            ]
+          },
+          {
+
+            "group": "Connectors",
+            "pages": [
+              "api-reference/endpoint/get",
+              "api-reference/endpoint/create",
+              "api-reference/endpoint/delete",
+              "api-reference/endpoint/webhook"
+            ]
+          },
+          {
+
+            "group": "Transaction Responses",
+            "pages": [
+              "api-reference/endpoint/get",
+              "api-reference/endpoint/create",
+              "api-reference/endpoint/delete",
+              "api-reference/endpoint/webhook"
+            ]
+          },
+          {
+
+            "group": "Authorisation Levels",
             "pages": [
               "api-reference/endpoint/get",
               "api-reference/endpoint/create",
@@ -89,20 +152,20 @@
     }
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "/logo/one-khusa.svg",
+    "dark": "/logo/one-khusa.svg"
   },
   "navbar": {
     "links": [
       {
         "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "href": "mailto:support@khusa.africa"
       }
     ],
     "primary": {
       "type": "button",
       "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "href": "https://merchant.portal.test.khusa.africa/"
     }
   },
   "contextual": {
@@ -119,9 +182,9 @@
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "x": "https://x.com/one-khusa",
+      "github": "https://github.com/one-khusa",
+      "linkedin": "https://linkedin.com/company/one-khusa"
     }
   }
 }

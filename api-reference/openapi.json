@@ -1,8 +1,8 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
+    "title": "Disbursements API",
+    "description": "API for managing bulk and single disbursements (payouts), including adding, canceling, approving, and transferring funds.",
     "license": {
       "name": "MIT"
     },
@@ -10,7 +10,7 @@
   },
   "servers": [
     {
-      "url": "http://sandbox.mintlify.com"
+      "url": "http://sandbox.one-kusa.com/v1/api/disbursements"
     }
   ],
   "security": [
@@ -19,76 +19,159 @@
     }
   ],
   "paths": {
-    "/plants": {
-      "get": {
-        "description": "Returns all plants from the system that the user has access to",
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of results to return",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
+    "/batch/addFile": {
+      "post": {
+        "description": "Upload an Excel or CSV file to add multiple disbursements in a batch",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": ["file"]
+              }
             }
           }
-        ],
+        },
         "responses": {
-          "200": {
-            "description": "Plant response",
+          "201": {
+            "description": "Batch created successfully",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Plant"
-                  }
-                }
+                "schema": { "$ref": "#/components/schemas/Batch" }
               }
             }
           },
           "400": {
-            "description": "Unexpected error",
+            "description": "Invalid file or missing fields",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
+                "schema": { "$ref": "#/components/schemas/Error" }
               }
             }
           }
         }
-      },
+      }
+    },
+    "/batch/addJson": {
       "post": {
-        "description": "Creates a new plant in the store",
+        "description": "Add multiple disbursements in a batch using JSON payload",
         "requestBody": {
-          "description": "Plant to add to the store",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewPlant"
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/Transaction" }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Batch created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Batch" }
               }
             }
           },
-          "required": true
+          "422": {
+            "description": "Unprocessable entity",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/batch/cancel": {
+      "delete": {
+        "description": "Cancel a batch before transfer",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "batchId": { "type": "string" } },
+                "required": ["batchId"]
+              }
+            }
+          }
         },
         "responses": {
           "200": {
-            "description": "plant response",
+            "description": "Batch canceled successfully"
+          },
+          "404": {
+            "description": "Batch not found",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Plant"
-                }
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/batch/changeStatus": {
+      "put": {
+        "description": "Update batch status (pending, approved, rejected)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "batchId": { "type": "string" },
+                  "status": { "type": "string", "enum": ["pending", "approved", "rejected"] }
+                },
+                "required": ["batchId", "status"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Batch" }
               }
             }
           },
           "400": {
-            "description": "unexpected error",
+            "description": "Invalid status",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/batch/getBatches": {
+      "get": {
+        "description": "List all posted batches",
+        "parameters": [
+          { "name": "status", "in": "query", "schema": { "type": "string" } },
+          { "name": "dateRange", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of batches",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Batch" }
                 }
               }
             }
@@ -96,32 +179,183 @@
         }
       }
     },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
+    "/batch/getTransactions": {
+      "get": {
+        "description": "Get transactions for a batch",
         "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID of plant to delete",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
+          { "name": "batchId", "in": "query", "required": true, "schema": { "type": "string" } }
         ],
         "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
-          },
-          "400": {
-            "description": "unexpected error",
+          "200": {
+            "description": "Transactions in batch",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Transaction" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/batch/getBatch": {
+      "get": {
+        "description": "Get details of a batch",
+        "parameters": [
+          { "name": "batchId", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Batch details",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Batch" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/batch/getTransaction": {
+      "get": {
+        "description": "Get details of a transaction in a batch",
+        "parameters": [
+          { "name": "batchId", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "transactionId", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transaction details",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Transaction" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/batch/reject": {
+      "delete": {
+        "description": "Reject a batch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "type": "object", "properties": { "batchId": { "type": "string" } } }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Batch rejected" }
+        }
+      }
+    },
+    "/batch/transferFunds": {
+      "post": {
+        "description": "Initiate funds transfer for an approved batch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "type": "object", "properties": { "batchId": { "type": "string" } } }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Funds transfer started"
+          }
+        }
+      }
+    },
+    "/batch/download": {
+      "get": {
+        "description": "Download batch transactions in CSV or Excel",
+        "parameters": [
+          { "name": "batchId", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "format", "in": "query", "schema": { "type": "string", "enum": ["csv", "excel"] } }
+        ],
+        "responses": {
+          "200": {
+            "description": "File download",
+            "content": {
+              "text/csv": {},
+              "application/vnd.ms-excel": {}
+            }
+          }
+        }
+      }
+    },
+    "/batch/generateFakeTransactions": {
+      "get": {
+        "description": "Generate fake transactions for testing",
+        "parameters": [
+          { "name": "count", "in": "query", "schema": { "type": "integer", "default": 10 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Fake transactions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Transaction" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/single/add": {
+      "post": {
+        "description": "Add a single disbursement transaction",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Transaction" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Transaction created" }
+        }
+      }
+    },
+    "/single/getTransaction": {
+      "get": {
+        "description": "Get a single disbursement transaction",
+        "parameters": [
+          { "name": "transactionId", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transaction details",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Transaction" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/single/getTransactions": {
+      "get": {
+        "description": "Get all single disbursement transactions",
+        "parameters": [
+          { "name": "status", "in": "query", "schema": { "type": "string" } },
+          { "name": "dateRange", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of transactions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Transaction" }
                 }
               }
             }
@@ -130,80 +364,38 @@
       }
     }
   },
-  "webhooks": {
-    "/plant/webhook": {
-      "post": {
-        "description": "Information about a new plant added to the store",
-        "requestBody": {
-          "description": "Plant added to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Return a 200 status to indicate that the data was received successfully"
-          }
-        }
-      }
-    }
-  },
   "components": {
     "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
+      "Batch": {
         "type": "object",
         "properties": {
-          "name": {
-            "description": "The name of the plant",
-            "type": "string"
-          },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
+          "batchId": { "type": "string" },
+          "status": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "totalAmount": { "type": "number" },
+          "transactions": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Transaction" }
           }
         }
       },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
-          },
-          {
-            "required": [
-              "id"
-            ],
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
-              }
-            }
-          }
-        ]
-      },
-      "Error": {
-        "required": [
-          "error",
-          "message"
-        ],
+      "Transaction": {
         "type": "object",
         "properties": {
-          "error": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "message": {
-            "type": "string"
-          }
+          "transactionId": { "type": "string" },
+          "amount": { "type": "number" },
+          "recipient": { "type": "string" },
+          "currency": { "type": "string" },
+          "status": { "type": "string" },
+          "batchId": { "type": ["string", "null"] }
+        }
+      },
+      "Error": {
+        "required": ["error", "message"],
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" },
+          "message": { "type": "string" }
         }
       }
     },
